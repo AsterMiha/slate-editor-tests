@@ -44,3 +44,20 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## TODO
+- [ ] copy paste for simple example:
+    - by default, sections copied across multiple types of elements become the children of the node they are copied into
+    - should they just all take the element type of the paste location?
+    - should it depend on the past location? eg. if parent is exercise we create a new exercise with the copied fields, if question or solution convert all to the parent type
+    - only correct when nesting level is too high
+
+- [x] finalize impl for missing nodes
+- [ ] wrap question and solution in exercise if needed
+- [ ] additional nodes
+- [ ] button for adding exercises
+
+- [ ] placeholder text: https://jkrsp.com/slate-js-placeholder-per-line/
+
+- [ ] testing: https://github.com/mwood23/slate-test-utils
+- [ ] Serlo design
