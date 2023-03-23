@@ -162,28 +162,31 @@ function App() {
   );
 }
 
-function addMissing(exercise: Exercise): Exercise {
-  const question: Question = emptyQ;
-  const solution: Solution = emptyS;
+function addMissing(exercise: Exercise): [boolean, Exercise] {
+  var question: Question = emptyQ;
+  var solution: Solution = emptyS;
+  var changed: boolean = false;
 
-  if (exercise.children.length === 2)
-    return exercise;
+  // empty exercise
+  if (exercise.children.length === 0)
+    changed = true;
+
+  // 1 missing field
+  if (exercise.children.length === 1) {
+    if (exercise.children[0].type === 'question') {
+      question = exercise.children[0];
+    } else {
+      solution = exercise.children[0];
+    }
+    changed = true;
+  }
 
   let newExercise: Exercise = {
     type: 'exercise',
     children: [question, solution],
   }
 
-  console.log(exercise.children);
-  if (question.children.length === 0) {
-    newExercise.children[0] = emptyQ;
-  }
-
-  if (solution.children.length === 0) {
-    newExercise.children[1] = emptyS;
-  }
-
-  return newExercise;
+  return [changed, newExercise];
 }
 
 function withCustomNormalization(editor: Editor) {
@@ -198,16 +201,22 @@ function withCustomNormalization(editor: Editor) {
       for (let i = 0; i < editor.children.length; i++) {
         console.log("- " + i + ": " + editor.children[i].type);
         const element = editor.children[i];
-        if (element.type === "exercise" && element.children.length !== 2) {
+        if (element.type === "exercise") {
           console.log(element.children.length);
           // Check exercise composition
-          const newEx: Exercise = addMissing(element);
-          // Transforms.setNodes(editor, newEx, {at: [i]});
-          Transforms.removeNodes(editor, {at: [i]});
-          Transforms.insertNodes(editor, newEx, {at: [i], select: true});
+
+          // Check for extra elements
+
+          // Check for missing elements
+          const [changed, newEx]: [boolean, Exercise] = addMissing(element);
+          if (changed) {
+            Transforms.removeNodes(editor, {at: [i]});
+            Transforms.insertNodes(editor, newEx, {at: [i], select: true});
+          }
 
         } else {
-          // Remove elements that are not exercises
+          // Remove unsuitable nodes
+          // Wrap question and solution in exercise
         }
       }
       console.log("___________");
