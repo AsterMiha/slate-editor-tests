@@ -94,7 +94,7 @@ const emptyS: Solution = {
 
 function App() {
   const [editor] = useState(() =>
-    withCustomNormalization(withReact(createEditor()))
+    withHtml(withCustomNormalization(withReact(createEditor())))
   );
 
   const renderElement = useCallback((props: RenderElementProps) => {
@@ -135,7 +135,20 @@ function App() {
           </pre>
         );
       case "paragraph":
-        return <p {...props.attributes}> {props.children} </p>;
+        return (
+          <div
+            style={{
+              border: "pink solid 1px",
+              borderRadius: "2px",
+              padding: "0.3em",
+              marginBottom: "0.2em"
+            }}
+            {...props.attributes}
+          >
+            {" "}
+            {props.children}{" "}
+          </div>
+        );
       case "solution":
         return (
           <div
@@ -143,6 +156,7 @@ function App() {
               border: "green solid 1px",
               borderRadius: "2px",
               padding: "0.3em",
+              marginBottom: "0.2em"
             }}
             {...props.attributes}
           >
@@ -189,12 +203,27 @@ function addMissing(exercise: Exercise): [boolean, Exercise] {
   return [changed, newExercise];
 }
 
+function prettyPrintEditor(elems: Descendant[], spacing=0) {
+  for (let i=0; i<elems.length; i++) {
+    const elem: Descendant = elems[i];
+    const isTextNode = elem.type === 'text';
+    let textContent = '';
+    if (isTextNode) {
+      textContent = elem.text;
+    }
+    console.log(Array(spacing + 1).join(" ") + "type: " + elems[i].type + ": " + textContent)
+    if (!isTextNode)
+      prettyPrintEditor(elem.children, spacing + 4)
+  }
+}
+
 function withCustomNormalization(editor: Editor) {
   let { normalizeNode } = editor;
 
   editor.normalizeNode = ([entry, path]) => {
     if (path.length === 0) {
       console.log(editor.children.length);
+      prettyPrintEditor(editor.children)
 
       console.log("___________");
       // Check that all elements are exercises
@@ -226,6 +255,71 @@ function withCustomNormalization(editor: Editor) {
     return normalizeNode([entry, path]);
   };
   return editor;
+}
+
+function withHtml (editor: Editor) {
+  const { insertData } = editor;
+
+  editor.insertData = data => {
+    const html = data.getData('text/html');
+    console.log(html);
+
+    if (html) {
+      const parsed = new DOMParser().parseFromString(html, 'text/html');
+      console.log(parsed); 
+      const fragment = deserialize(parsed.body)
+      // Transforms.insertFragment(editor, fragment)
+      return
+    }
+
+    insertData(data)
+  }
+
+  return editor
+}
+
+function deserialize(el: ChildNode) {
+  // if (el.nodeType === 3) {
+  //   return el.textContent
+  // } else if (el.nodeType !== 1) {
+  //   return null
+  // } else if (el.nodeName === 'BR') {
+  //   return '\n'
+  // }
+
+  // const { nodeName } = el;
+  let parent = el;
+
+  // if (
+  //   nodeName === 'PRE' &&
+  //   el.childNodes[0] &&
+  //   el.childNodes[0].nodeName === 'CODE'
+  // ) {
+  //   parent = el.childNodes[0]
+  // }
+  let children: ChildNode[] = Array.from(parent.childNodes)
+    .map(deserialize)
+    .flat();
+
+  // if (children.length === 0) {
+  //   children = [{ text: '' }]
+  // }
+
+  // if (el.nodeName === 'BODY') {
+  //   return jsx('fragment', {}, children)
+  // }
+
+  // if (ELEMENT_TAGS[nodeName]) {
+  //   const attrs = ELEMENT_TAGS[nodeName](el)
+  //   return jsx('element', attrs, children)
+  // }
+
+  // if (TEXT_TAGS[nodeName]) {
+  //   const attrs = TEXT_TAGS[nodeName](el)
+  //   return children.map(child => jsx('text', attrs, child))
+  // }
+
+  return children;
 }
 
 export default App;
