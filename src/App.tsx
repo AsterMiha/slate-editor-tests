@@ -2,6 +2,7 @@ import "./App.css";
 
 // Import React dependencies.
 import React, { useState, useCallback } from "react";
+
 // Import the Slate editor factory.
 import {
   createEditor,
@@ -9,6 +10,10 @@ import {
   Transforms,
   Editor,
 } from "slate";
+
+// Enable undo/redo actions
+import { withHistory } from 'slate-history';
+
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, RenderElementProps } from "slate-react";
 import { Exercise, Question, Solution } from "./react-app-env";
@@ -94,7 +99,9 @@ const emptyS: Solution = {
 
 function App() {
   const [editor] = useState(() =>
-    withHtml(withCustomNormalization(withReact(createEditor())))
+    // withHtml(
+      withHistory(withCustomNormalization(withReact(createEditor())))
+      // )
   );
 
   const renderElement = useCallback((props: RenderElementProps) => {
@@ -170,7 +177,9 @@ function App() {
   return (
     <div style={{padding: "2em"}}>
     <Slate editor={editor} value={initialValue}>
-      <Editable renderElement={renderElement} />
+      <Editable
+        renderElement={renderElement}
+      />
     </Slate>
     </div>
   );
@@ -223,7 +232,7 @@ function withCustomNormalization(editor: Editor) {
   editor.normalizeNode = ([entry, path]) => {
     if (path.length === 0) {
       console.log(editor.children.length);
-      prettyPrintEditor(editor.children)
+      prettyPrintEditor(editor.children);
 
       console.log("___________");
       // Check that all elements are exercises
@@ -262,17 +271,19 @@ function withHtml (editor: Editor) {
 
   editor.insertData = data => {
     const html = data.getData('text/html');
-    console.log(html);
+    const plain = data.getData('text/plain');
+    console.log(plain);
 
-    if (html) {
-      const parsed = new DOMParser().parseFromString(html, 'text/html');
-      console.log(parsed); 
-      const fragment = deserialize(parsed.body)
-      // Transforms.insertFragment(editor, fragment)
-      return
-    }
-
-    insertData(data)
+    // if (html) {
+    //   const parsed = new DOMParser().parseFromString(html, 'text/html');
+    //   console.log(parsed); 
+    //   const fragment = deserialize(parsed.body);
+    //   // Transforms.insertFragment(editor, fragment)
+    //   return;
+    // } /*else {
+    //   console.log("nohtml")*/
+    insertData(data);
+    //}
   }
 
   return editor

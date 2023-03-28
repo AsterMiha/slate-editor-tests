@@ -2,7 +2,7 @@ Default constraints: https://docs.slatejs.org/concepts/11-normalizing#built-in-c
 ## Selection behavior
 By default, the selection direction influences the fields that will be merged when deleting the selected section.
 ## Copy paste
-Pasting inside a text element: all copied parts become text
+Pasting inside a text element: all copied parts become text.
 Pasing on a new line: all parts keep their initial type (exercise/question/solution)
 ## TODO
 - [ ] copy paste for simple example:
@@ -18,8 +18,7 @@ Pasing on a new line: all parts keep their initial type (exercise/question/solut
 - [ ] additional nodes
 - [ ] consistent selection
 - [ ] enable richtext pasting
-- [ ] undo: import { withHistory } from 'slate-history'
-            https://docs.slatejs.org/libraries/slate-history
+- [x] undo: https://docs.slatejs.org/libraries/slate-history
 
 - [ ] placeholder text: https://jkrsp.com/slate-js-placeholder-per-line/
 
