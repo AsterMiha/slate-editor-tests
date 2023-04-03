@@ -16,7 +16,8 @@ import { withHistory } from 'slate-history';
 
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, RenderElementProps, RenderLeafProps, DefaultLeaf } from "slate-react";
-import { Exercise, Question, Solution } from "./react-app-env";
+import { Exercise, Question, Solution, Paragraph, CustomElement } from "./react-app-env";
+import { group } from "console";
 
 const initialValue: Descendant[] = [
   {
@@ -210,6 +211,63 @@ function addMissing(exercise: Exercise): [boolean, Exercise] {
   return [changed, newExercise];
 }
 
+function liftIntoExercise(exercise: Exercise): [boolean, Exercise] {
+  let newEx: Exercise = {type: 'exercise', children: []};
+  let changed: boolean = false;
+  
+  for (let i=0; i<exercise.children.length; i++) {
+    const child = exercise.children[i];
+    const child_type = child.type;
+
+    // Split elements by type
+    const groups = child.children.reduce<(Paragraph[]|Exercise[]|Solution[]|Question[])[]>(
+      (acc, current, index, array) => {
+        if (index === 0) {
+          return [[current]];
+        }
+        // Same type, add to previous group
+        let current_list = acc[acc.length - 1];
+        if (isArrayOfType(current.type, current_list)) {
+          current_list.push(current);
+        } else { // Different type, create new group
+          acc.push([current]);
+        }
+        return acc;
+      },
+      [[]]
+    );
+ 
+    console.log(groups);
+
+    for (let g=0; g<groups.length; g++) {
+      let group = groups[g];
+      // Add paragraph sections back
+      if (isArrayOfType('paragraph', group)) {
+        const paragraphs: Paragraph[] = group;
+        switch(child_type) {
+          case 'question':
+          case 'solution':
+            newEx.children.push({type: child_type, children: paragraphs});
+            break;
+          default:
+            break;
+        }
+      } else { // Lift question and solution elements up
+          for (let e=0; e<group.length; e++) {
+            const child = group[e];
+            if (child.type === 'question' || child.type === 'solution')
+              newEx.children.push({type: child.type, children: child.children});
+          }
+          changed = true;
+        }
+      }
+    }
+
+  console.log(newEx);
+  console.log(changed);
+  return [changed, newEx];
+}
+
 function prettyPrintEditor(elems: Descendant[], spacing=0) {
   for (let i=0; i<elems.length; i++) {
     const elem: Descendant = elems[i];
@@ -240,11 +298,19 @@ function withCustomNormalization(editor: Editor) {
         if (element.type === "exercise") {
           console.log(element.children.length);
           // Check exercise composition
+          // Pull nested exercises up
+
+          // Pull extra question and solution elements up into the exercise node
+          let [changed, newEx] = liftIntoExercise(element);
+          if (changed) {
+            Transforms.removeNodes(editor, {at: [i]});
+            Transforms.insertNodes(editor, newEx, {at: [i], select: true});
+          }
 
           // Check for extra elements
 
           // Check for missing elements
-          const [changed, newEx]: [boolean, Exercise] = addMissing(element);
+          [changed, newEx] = addMissing(newEx);
           if (changed) {
             Transforms.removeNodes(editor, {at: [i]});
             Transforms.insertNodes(editor, newEx, {at: [i], select: true});
@@ -262,6 +328,10 @@ function withCustomNormalization(editor: Editor) {
     return normalizeNode([entry, path]);
   };
   return editor;
+}
+
+function isArrayOfType<A extends CustomElement["type"]>(type: A, value: {type: string}[]): value is { type: A }[] {
+  return value.every(v => v.type === type)
 }
 
 export default App;

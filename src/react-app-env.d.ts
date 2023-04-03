@@ -5,7 +5,6 @@ import { BaseEditor } from "slate";
 import { ReactEditor } from "slate-react";
 
 type CustomElement = Paragraph | Code | Question | Solution | Exercise;
-type ExercisePart = Question | QuestionBody | Solution | SolutionBody;
 type CustomText = { type: "text"; text: string };
 
 interface Paragraph {
@@ -19,7 +18,6 @@ interface Code {
 
 interface Exercise {
   type: "exercise";
-  // children: [Question, Solution];
   children: (Question | Solution)[];
 }
 
