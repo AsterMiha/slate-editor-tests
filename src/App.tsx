@@ -211,8 +211,9 @@ function addMissing(exercise: Exercise): [boolean, Exercise] {
   return [changed, newExercise];
 }
 
-function liftIntoExercise(exercise: Exercise): [boolean, Exercise] {
+function liftNestedElementsUp(exercise: Exercise): [boolean, Exercise[]] {
   let newEx: Exercise = {type: 'exercise', children: []};
+  let finalExList: Exercise[] = [];
   let changed: boolean = false;
   
   for (let i=0; i<exercise.children.length; i++) {
@@ -237,8 +238,6 @@ function liftIntoExercise(exercise: Exercise): [boolean, Exercise] {
       [[]]
     );
  
-    console.log(groups);
-
     for (let g=0; g<groups.length; g++) {
       let group = groups[g];
       // Add paragraph sections back
@@ -252,20 +251,31 @@ function liftIntoExercise(exercise: Exercise): [boolean, Exercise] {
           default:
             break;
         }
-      } else { // Lift question and solution elements up
+      } else { // Lift nested elements up
           for (let e=0; e<group.length; e++) {
             const child = group[e];
-            if (child.type === 'question' || child.type === 'solution')
+            // Add elements to the current exercise
+            if (child.type === 'question' || child.type === 'solution') {
               newEx.children.push({type: child.type, children: child.children});
+            } else if (child.type === 'exercise') {
+              // Insert new exercise in list
+              if (newEx.children.length !== 0) {
+                finalExList.push(newEx);
+                newEx = {type: 'exercise', children: []};
+              }
+              // Lift exercise out of exercise element
+              finalExList.push(child);
+            }
           }
-          changed = true;
-        }
+        changed = true;
       }
     }
+  }
 
-  console.log(newEx);
-  console.log(changed);
-  return [changed, newEx];
+  if (newEx.children.length !== 0)
+    finalExList.push(newEx);
+
+  return [changed, finalExList];
 }
 
 function prettyPrintEditor(elems: Descendant[], spacing=0) {
@@ -287,7 +297,7 @@ function withCustomNormalization(editor: Editor) {
 
   editor.normalizeNode = ([entry, path]) => {
     if (path.length === 0) {
-      console.log(editor.children.length);
+      let finalExList: Exercise[] = [];
       prettyPrintEditor(editor.children);
 
       console.log("___________");
@@ -296,31 +306,30 @@ function withCustomNormalization(editor: Editor) {
         console.log("- " + i + ": " + editor.children[i].type);
         const element = editor.children[i];
         if (element.type === "exercise") {
-          console.log(element.children.length);
           // Check exercise composition
-          // Pull nested exercises up
-
-          // Pull extra question and solution elements up into the exercise node
-          let [changed, newEx] = liftIntoExercise(element);
-          if (changed) {
-            Transforms.removeNodes(editor, {at: [i]});
-            Transforms.insertNodes(editor, newEx, {at: [i], select: true});
-          }
-
-          // Check for extra elements
+          // Pull nested elements up
+          let [changed, newExList] = liftNestedElementsUp(element);
+          let newEx: Exercise;
+          if (!changed)
+            newExList = [element];
 
           // Check for missing elements
-          [changed, newEx] = addMissing(newEx);
-          if (changed) {
-            Transforms.removeNodes(editor, {at: [i]});
-            Transforms.insertNodes(editor, newEx, {at: [i], select: true});
-          }
-
+          newExList.forEach(ex => {
+            [changed, newEx] = addMissing(ex);
+            if (!changed)
+              newEx = ex;
+            finalExList.push(newEx);
+          })
         } else {
           // Remove unsuitable nodes
           // Wrap question and solution in exercise
         }
       }
+      if (finalExList.length !== 0)
+        editor.children = finalExList;
+      console.log("*******************");
+      console.log(editor.children);
+      console.log("*******************")
       console.log("___________");
     }
 

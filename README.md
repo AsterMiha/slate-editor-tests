@@ -9,7 +9,7 @@ Pasing on a new line: all parts keep their initial type (exercise/question/solut
 By default, the entire divs containing Slate elements are marked as editable. However changes in text not enclosed in a Slate element result in errors. We should avoid rendering elements managed by Slate along with other elements in the same div.
 
 ## TODO
-- [ ] copy paste for simple example:
+- [x] copy paste for simple example:
     - by default, sections copied across multiple types of elements become the children of the node they are copied into
     - should they just all take the element type of the paste location?
     - should it depend on the past location? eg. if parent is exercise we create a new exercise with the copied fields, if question or solution convert all to the parent type
