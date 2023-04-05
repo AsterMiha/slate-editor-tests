@@ -17,13 +17,12 @@ By default, the entire divs containing Slate elements are marked as editable. Ho
     - onPaste for Editor or insertData for Editable?
 
 - [x] finalize impl for missing nodes
-- [ ] wrap question and solution in exercise if needed
-- [ ] additional nodes
-- [ ] enable richtext pasting
+- [x] wrap question and solution in exercise -> can't paste outside of paragraphs so not needed currently
+- [x] additional nodes
 - [x] undo: https://docs.slatejs.org/libraries/slate-history
-- [ ] ? add empty fields between exercises for pasting exercises directly between other exercises
 
 - [ ] placeholder text: https://jkrsp.com/slate-js-placeholder-per-line/
+- [ ] enable richtext pasting
 
 - [ ] testing: https://github.com/mwood23/slate-test-utils
 - [ ] Serlo design

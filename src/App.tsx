@@ -278,6 +278,34 @@ function liftNestedElementsUp(exercise: Exercise): [boolean, Exercise[]] {
   return [changed, finalExList];
 }
 
+function splitExWithExtraElements(ex: Exercise): [boolean, Exercise[]] {
+  let finalExList: Exercise[] = [];
+  let newEx: Exercise = {type: 'exercise', children: []};
+
+  ex.children.forEach(elem => {
+    switch(elem.type) {
+      case 'question':
+        // For when pasting text introduces additional question fields
+        if (newEx.children.length !== 0) {
+          finalExList.push(newEx);
+          newEx = {type: 'exercise', children: []};
+        }
+        newEx.children.push(elem);
+        break;
+      case 'solution':
+        newEx.children.push(elem);
+        finalExList.push(newEx);
+        newEx = {type: 'exercise', children: []};
+        break;
+    }
+  });
+
+  if (newEx.children.length !== 0)
+    finalExList.push(newEx);
+
+  return [finalExList.length !== 0, finalExList];
+}
+
 function prettyPrintEditor(elems: Descendant[], spacing=0) {
   for (let i=0; i<elems.length; i++) {
     const elem: Descendant = elems[i];
@@ -313,23 +341,28 @@ function withCustomNormalization(editor: Editor) {
           if (!changed)
             newExList = [element];
 
+          // Split exercises with extra nodes
+          let splitExList: Exercise[] = [];
+          newExList.forEach(ex => {
+            let [changed, splitted] = splitExWithExtraElements(ex);
+            if (!changed)
+              splitted = [ex];
+            splitted.forEach(ex => splitExList.push(ex));
+          });
+          newExList = splitExList;
+
           // Check for missing elements
           newExList.forEach(ex => {
             [changed, newEx] = addMissing(ex);
             if (!changed)
               newEx = ex;
             finalExList.push(newEx);
-          })
-        } else {
-          // Remove unsuitable nodes
-          // Wrap question and solution in exercise
+          });
         }
       }
       if (finalExList.length !== 0)
         editor.children = finalExList;
-      console.log("*******************");
       console.log(editor.children);
-      console.log("*******************")
       console.log("___________");
     }
 
