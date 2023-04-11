@@ -4,7 +4,7 @@
 import { BaseEditor } from "slate";
 import { ReactEditor } from "slate-react";
 
-type CustomElement = Paragraph | Code | Question | Solution | Exercise;
+type CustomElement = Paragraph | Code | Question | Solution | Exercise | Image;
 type CustomText = { type: "text"; text: string };
 
 interface Paragraph {
@@ -21,9 +21,11 @@ interface Exercise {
   children: (Question | Solution)[];
 }
 
-// { "type": "exercise", "question": ..., "solutio": ... } -> { type: "exercise", children: [] }
-// Dict <-> List of tuples
-
+interface Image {
+  type: "image";
+  url?: string;
+  children: CustomText[];
+}
 
 const example: Exercise = {
   type: "exercise",
@@ -47,22 +49,16 @@ const example: Exercise = {
   ],
 };
 
-/*
-Question title - 1 line
-Question body - variable length
-Solution title - 1 line
-Solution body - variable length
-*/
 interface Question {
   type: "question";
-  children: Paragraph[];
+  children: (Paragraph | Image)[];
 }
-//interface QuestionBody { type: 'questionBody'; children: CustomText[] }
 interface Solution {
   type: "solution";
-  children: Paragraph[];
+  children: (Paragraph | Image) [];
 }
-//interface SolutionBody { type: 'solutionBody'; children: CustomText[] }
+
+type ExSection = Paragraph | Image;
 
 declare module "slate" {
   interface CustomTypes {

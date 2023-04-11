@@ -20,6 +20,9 @@ By default, the entire divs containing Slate elements are marked as editable. Ho
 - [x] wrap question and solution in exercise -> can't paste outside of paragraphs so not needed currently
 - [x] additional nodes
 - [x] undo: https://docs.slatejs.org/libraries/slate-history
+- [ ] unchangeable text (contenteditable="false" in the div)
+- [x] add images
+- [ ] scale images
 
 - [ ] placeholder text: https://jkrsp.com/slate-js-placeholder-per-line/
 - [ ] enable richtext pasting

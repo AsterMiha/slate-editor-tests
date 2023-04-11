@@ -16,8 +16,11 @@ import { withHistory } from 'slate-history';
 
 // Import the Slate components and React plugin.
 import { Slate, Editable, withReact, RenderElementProps, RenderLeafProps, DefaultLeaf } from "slate-react";
-import { Exercise, Question, Solution, Paragraph, CustomElement } from "./react-app-env";
-import { group } from "console";
+import { Exercise, Question, Solution, Paragraph, CustomElement, Image, CustomText, ExSection } from "./react-app-env";
+
+// Used to manage images
+import isUrl from 'is-url';
+import imageExtensions from 'image-extensions';
 
 const initialValue: Descendant[] = [
   {
@@ -100,9 +103,9 @@ const emptyS: Solution = {
 
 function App() {
   const [editor] = useState(() =>
-    // withHtml(
+    withImages(
       withHistory(withCustomNormalization(withReact(createEditor())))
-      // )
+      )
   );
 
   const renderLeaf = useCallback((props: RenderLeafProps) => <DefaultLeaf {...props} />, []);
@@ -169,6 +172,21 @@ function App() {
             {props.children}
           </div>
         );
+        case "image":
+        return (
+          <div
+            style={{
+              border: "purple solid 1px",
+              borderRadius: "2px",
+              padding: "0.3em",
+              marginBottom: "0.2em"
+            }}
+            {...props.attributes}
+          >
+            {props.children}
+            <img src={props.element.url} />
+          </div>
+        );
     }
   }, []);
 
@@ -221,14 +239,16 @@ function liftNestedElementsUp(exercise: Exercise): [boolean, Exercise[]] {
     const child_type = child.type;
 
     // Split elements by type
-    const groups = child.children.reduce<(Paragraph[]|Exercise[]|Solution[]|Question[])[]>(
+    const groups = child.children.reduce<((Paragraph|Image)[]|Exercise[]|Solution[]|Question[])[]>(
       (acc, current, index, array) => {
         if (index === 0) {
           return [[current]];
         }
         // Same type, add to previous group
         let current_list = acc[acc.length - 1];
-        if (isArrayOfType(current.type, current_list)) {
+        if (((current.type === 'paragraph' || current.type === 'image')
+          && isArrayOfTypeExSection('paragraph', 'image', current_list))
+          || isArrayOfType(current.type, current_list)) {
           current_list.push(current);
         } else { // Different type, create new group
           acc.push([current]);
@@ -241,8 +261,8 @@ function liftNestedElementsUp(exercise: Exercise): [boolean, Exercise[]] {
     for (let g=0; g<groups.length; g++) {
       let group = groups[g];
       // Add paragraph sections back
-      if (isArrayOfType('paragraph', group)) {
-        const paragraphs: Paragraph[] = group;
+      if (isArrayOfTypeExSection('paragraph', 'image', group)) {
+        const paragraphs: (Paragraph|Image)[] = group;
         switch(child_type) {
           case 'question':
           case 'solution':
@@ -307,15 +327,20 @@ function splitExWithExtraElements(ex: Exercise): [boolean, Exercise[]] {
 }
 
 function prettyPrintEditor(elems: Descendant[], spacing=0) {
+  if (elems === undefined && elems === null) return;
   for (let i=0; i<elems.length; i++) {
     const elem: Descendant = elems[i];
     const isTextNode = elem.type === 'text';
+    const isImageNode = elem.type === 'image';
     let textContent = '';
+    if (isImageNode) {
+      textContent = "Image";
+    }
     if (isTextNode) {
       textContent = elem.text;
     }
     console.log(Array(spacing + 1).join(" ") + "type: " + elems[i].type + ": " + textContent)
-    if (!isTextNode)
+    if (!isTextNode && !isImageNode)
       prettyPrintEditor(elem.children, spacing + 4)
   }
 }
@@ -372,8 +397,45 @@ function withCustomNormalization(editor: Editor) {
   return editor;
 }
 
+function withImages(editor: Editor) {
+  const { insertData, isVoid } = editor;
+
+  editor.isVoid = element => {
+    return element.type === 'image' ? true : isVoid(element);
+  }
+
+  editor.insertData = data => {
+    const text = data.getData('text/plain');
+    
+    if (isImageUrl(text)) {
+      insertImage(editor, text);
+    } else {
+      insertData(data);
+    }
+  }
+
+  return editor;
+}
+
+function insertImage(editor: Editor, url: string) {
+  const text: CustomText = { type: 'text', text: '' };
+  const image: Image = { type: 'image', url, children: [text] };
+  Transforms.insertNodes(editor, image);
+}
+
+function isImageUrl(url: string) {
+  if (!url) return false;
+  if (!isUrl(url)) return false;
+  const ext = new URL(url).pathname.split('.').pop();
+  return imageExtensions.includes(ext? ext: '');
+}
+
 function isArrayOfType<A extends CustomElement["type"]>(type: A, value: {type: string}[]): value is { type: A }[] {
-  return value.every(v => v.type === type)
+  return value.every(v => v.type === type);
+}
+
+function isArrayOfTypeExSection<A,B extends CustomElement["type"]>(type1: A, type2: B, value: {type: string}[]): value is ExSection[] {
+  return value.every(v => v.type === type1 || v.type===type2);
 }
 
 export default App;
