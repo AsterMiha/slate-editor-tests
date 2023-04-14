@@ -1,31 +1,24 @@
-Default constraints: https://docs.slatejs.org/concepts/11-normalizing#built-in-constraints
-## Selection behavior
-By default, the selection direction influences the fields that will be merged when deleting the selected section.
-## Copy paste
-Pasting inside a text element: all copied parts become text.
-Pasing on a new line: all parts keep their initial type (exercise/question/solution)
+## Usage
+Run examples with: `yarn start`
 
-## Editable divs
-By default, the entire divs containing Slate elements are marked as editable. However changes in text not enclosed in a Slate element result in errors. We should avoid rendering elements managed by Slate along with other elements in the same div.
+The implemented examples can be found here:
+- Slate: http://localhost:3000/slate
+- Lexical: http://localhost:3000/lexical
 
-## TODO
-- [x] copy paste for simple example:
-    - by default, sections copied across multiple types of elements become the children of the node they are copied into
-    - should they just all take the element type of the paste location?
-    - should it depend on the past location? eg. if parent is exercise we create a new exercise with the copied fields, if question or solution convert all to the parent type
-    - fix when nesting level is too high
-    - onPaste for Editor or insertData for Editable?
-
+## Slate implementation
+- [x] copy paste for simple example
 - [x] finalize impl for missing nodes
 - [x] wrap question and solution in exercise -> can't paste outside of paragraphs so not needed currently
 - [x] additional nodes
 - [x] undo: https://docs.slatejs.org/libraries/slate-history
-- [ ] unchangeable text (contenteditable="false" in the div)
 - [x] add images
-- [ ] scale images
-
+- [ ] unchangeable text (contenteditable="false" in the div)
+- [ ] scale images: https://github.com/udecode/plate
 - [ ] placeholder text: https://jkrsp.com/slate-js-placeholder-per-line/
 - [ ] enable richtext pasting
 
 - [ ] testing: https://github.com/mwood23/slate-test-utils
 - [ ] Serlo design
+
+## Lexical implementation
+- [ ] show simple editor

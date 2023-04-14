@@ -101,7 +101,7 @@ const emptyS: Solution = {
   ],
 };
 
-function App() {
+function SlateExample() {
   const [editor] = useState(() =>
     withImages(
       withHistory(withCustomNormalization(withReact(createEditor())))
@@ -438,4 +438,4 @@ function isArrayOfTypeExSection<A,B extends CustomElement["type"]>(type1: A, typ
   return value.every(v => v.type === type1 || v.type===type2);
 }
 
-export default App;
+export default SlateExample;
