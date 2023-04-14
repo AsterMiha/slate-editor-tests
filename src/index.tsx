@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import SlateExample from './SlateExample';
+import LexicalExample from './LexicalExample';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
@@ -13,7 +14,7 @@ root.render(
       <Routes>
         <Route path="/">
           <Route path="slate" element={<SlateExample />} />
-          {/* <Route path="lexical" element={<LexicalExample />} /> */}
+          <Route path="lexical" element={<LexicalExample />} />
         </Route>
       </Routes>
     </BrowserRouter>
