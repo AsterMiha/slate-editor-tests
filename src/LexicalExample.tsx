@@ -1,4 +1,4 @@
-import {$getRoot, $getSelection, EditorState} from 'lexical';
+import {$createLineBreakNode, $createParagraphNode, $createTextNode, $getRoot, $getSelection, EditorState, RootNode} from 'lexical';
 import {useEffect} from 'react';
 
 import {LexicalComposer} from '@lexical/react/LexicalComposer';
@@ -8,6 +8,45 @@ import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
 import {OnChangePlugin} from '@lexical/react/LexicalOnChangePlugin';
 import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
+
+
+function setInitialValue() {
+  const root = $getRoot();
+  if (root.getFirstChild() === null) {
+    // Add first question
+    let paragraph = $createParagraphNode();
+    paragraph.append(
+      $createTextNode("Question 1"),
+    );
+    root.append(paragraph);
+
+    // Add first solution
+    paragraph = $createParagraphNode();
+    paragraph.append(
+      $createTextNode("Line 1"),
+      $createLineBreakNode(),
+      $createTextNode("Line 2"),
+      $createLineBreakNode(),
+    );
+    root.append(paragraph);
+
+    // Add second question
+    paragraph = $createParagraphNode();
+    paragraph.append(
+      $createTextNode("Question 2"),
+    );
+    root.append(paragraph);
+
+    // Add second solution
+    paragraph = $createParagraphNode();
+    paragraph.append(
+      $createTextNode("Line 1"),
+      $createLineBreakNode(),
+      $createTextNode("Line 2"),
+    );
+    root.append(paragraph);
+  }
+}
 
 const theme = {
   // Theme styling goes here
@@ -52,6 +91,7 @@ function LexicalExample() {
     namespace: 'MyEditor', 
     theme,
     onError,
+    editorState: setInitialValue,
   };
 
   return (

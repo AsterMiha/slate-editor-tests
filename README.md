@@ -21,4 +21,8 @@ The implemented examples can be found here:
 - [ ] Serlo design
 
 ## Lexical implementation
-- [ ] show simple editor
+- [x] show simple editor
+- [x] add initial text
+- [ ] add borders to the different elements
+- [ ] undo/redo
+- [ ] fixed format: poll example: https://lexical.dev/docs/demos/plugins/poll
