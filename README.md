@@ -23,6 +23,6 @@ The implemented examples can be found here:
 ## Lexical implementation
 - [x] show simple editor
 - [x] add initial text
-- [ ] add borders to the different elements
+- [x] add borders to the different elements
 - [ ] undo/redo
 - [ ] fixed format: poll example: https://lexical.dev/docs/demos/plugins/poll
