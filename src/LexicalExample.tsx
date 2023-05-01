@@ -3,7 +3,7 @@ import "./App.css";
 import {
   $createLineBreakNode, $createTextNode, $getRoot, $getSelection,
   EditorConfig, EditorState,
-  ElementNode, LexicalEditor, LexicalNode, ParagraphNode, RootNode
+  ElementNode, LexicalEditor, LexicalNode, ParagraphNode, RootNode, TextNode
 } from 'lexical';
 import {$dfs} from '@lexical/utils';
 import {useEffect} from 'react';
@@ -44,6 +44,34 @@ class QuestionNode extends ElementNode {
     return false;
   }
 
+  excludeFromCopy(destination?: 'clone' | 'html'): boolean {
+    return false;
+  }
+
+  clear(): this {
+    return this;
+  }
+
+  // canInsertTextAfter(): boolean {
+  //   return true;
+  // }
+
+  splice(start: number, deleteCount: number, nodesToInsert: Array<LexicalNode>): this {
+    console.log("Called question splice");
+    // console.log(start, deleteCount, nodesToInsert);
+    // if (deleteCount === 0) {
+    //   nodesToInsert.forEach(node => this.insertBefore(node));
+    //   this.set
+    // }
+    console.log(deleteCount);
+    if (deleteCount !== 0) {
+
+    } else {
+      super.splice(start, deleteCount, nodesToInsert);
+    }
+    return this;
+  }
+
   // importJSON, exportJSON - should also be implemented for more complex formats
 }
 
@@ -81,6 +109,14 @@ class SolutionNode extends ElementNode {
     return false;
   }
 
+  excludeFromCopy(destination?: 'clone' | 'html'): boolean {
+    return false;
+  }
+
+  clear(): this {
+    return this;
+  }
+
   // importJSON, exportJSON - should also be implemented for more complex formats
 }
 
@@ -115,6 +151,12 @@ class ExerciseNode extends ElementNode {
 
   updateDOM(): boolean {
     return false;
+  }
+
+  splice(start: number, deleteCount: number, nodesToInsert: Array<LexicalNode>): this {
+    console.log("Splice in exercise");
+    super.splice(start, deleteCount, nodesToInsert);
+    return this;
   }
 
   // importJSON, exportJSON - should also be implemented for more complex formats
@@ -177,6 +219,9 @@ function setInitialValue() {
 
 const editor_theme = {
   // Theme styling goes here
+  text: {
+    base: "Pink-border"
+  }
 }
 
 // When the editor changes, you can get notified via the
