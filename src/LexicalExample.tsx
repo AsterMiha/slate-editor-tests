@@ -3,7 +3,8 @@ import "./App.css";
 import {
   $createLineBreakNode, $createTextNode, $getRoot, $getSelection,
   EditorConfig, EditorState,
-  ElementNode, LexicalEditor, LexicalNode, ParagraphNode, RootNode, TextNode
+  ElementNode, LexicalEditor, LexicalNode, ParagraphNode, RootNode, TextNode,
+  NodeKey
 } from 'lexical';
 import {$dfs} from '@lexical/utils';
 import {useEffect} from 'react';
@@ -52,24 +53,16 @@ class QuestionNode extends ElementNode {
     return this;
   }
 
-  // canInsertTextAfter(): boolean {
-  //   return true;
-  // }
+  isParentRequired(): boolean {
+    return true;
+  }
 
-  splice(start: number, deleteCount: number, nodesToInsert: Array<LexicalNode>): this {
-    console.log("Called question splice");
-    // console.log(start, deleteCount, nodesToInsert);
-    // if (deleteCount === 0) {
-    //   nodesToInsert.forEach(node => this.insertBefore(node));
-    //   this.set
-    // }
-    console.log(deleteCount);
-    if (deleteCount !== 0) {
+  createParentElementNode(): ElementNode {
+    return $createExerciseNode();
+  }
 
-    } else {
-      super.splice(start, deleteCount, nodesToInsert);
-    }
-    return this;
+  canMergeWith(node: ElementNode): boolean{
+    return false;
   }
 
   // importJSON, exportJSON - should also be implemented for more complex formats
@@ -117,6 +110,18 @@ class SolutionNode extends ElementNode {
     return this;
   }
 
+  isParentRequired(): boolean {
+    return true;
+  }
+
+  createParentElementNode(): ElementNode {
+    return $createExerciseNode();
+  }
+
+  canMergeWith(node: ElementNode): boolean{
+    return false;
+  }
+
   // importJSON, exportJSON - should also be implemented for more complex formats
 }
 
@@ -153,10 +158,8 @@ class ExerciseNode extends ElementNode {
     return false;
   }
 
-  splice(start: number, deleteCount: number, nodesToInsert: Array<LexicalNode>): this {
-    console.log("Splice in exercise");
-    super.splice(start, deleteCount, nodesToInsert);
-    return this;
+  canMergeWith(node: ElementNode): boolean{
+    return false;
   }
 
   // importJSON, exportJSON - should also be implemented for more complex formats
@@ -170,6 +173,37 @@ export function $isExerciseNode(node: LexicalNode): boolean {
   return node instanceof ExerciseNode;
 }
 
+class ExerciseText extends TextNode {
+  static getType(): string {
+    return 'exercise-text';
+  }
+
+  static clone(node: TextNode): ExerciseText {
+    return new ExerciseText(node.getTextContent());
+  }
+
+  isParentRequired(): boolean {
+    return true;
+  }
+
+  createParentElementNode(): ElementNode {
+    console.log("create parent");
+    return $createSolutionNode();
+  }
+
+  canMergeWith(node: ElementNode): boolean{
+    return false;
+  }
+}
+
+export function $createExerciseText(text: string): ExerciseText {
+  return new ExerciseText(text);
+}
+
+export function $isExerciseText(node: LexicalNode): boolean {
+  return node instanceof ExerciseText;
+}
+
 function setInitialValue() {
   const root: RootNode = $getRoot();
   if (root.getFirstChild() === null) {
@@ -179,15 +213,15 @@ function setInitialValue() {
 
     // Create first question
     question.append(
-      $createTextNode("Question 1"),
+      $createExerciseText("Question 1"),
     );
 
     // Create first solution
     solution = $createSolutionNode();
     solution.append(
-      $createTextNode("Line 1"),
+      $createExerciseText("Line 1"),
       $createLineBreakNode(),
-      $createTextNode("Line 2"),
+      $createExerciseText("Line 2"),
     );
 
     // Add first exercise
@@ -200,15 +234,15 @@ function setInitialValue() {
     // Create second question
     question = $createQuestionNode();
     question.append(
-      $createTextNode("Question 2"),
+      $createExerciseText("Question 2"),
     );
 
     // Create second solution
     solution = $createSolutionNode();
     solution.append(
-      $createTextNode("Line 1"),
+      $createExerciseText("Line 1"),
       $createLineBreakNode(),
-      $createTextNode("Line 2"),
+      $createExerciseText("Line 2"),
     );
 
     // Add second exercise
@@ -251,6 +285,22 @@ function MyCustomAutoFocusPlugin() {
   return null;
 }
 
+function PreserveExStructurePlugin() {
+  const [editor] = useLexicalComposerContext();
+
+  // Adds newline when node is empty
+  const preventDeletion = ((node: ElementNode) => {
+    if (node.getChildrenSize() === 0) {
+      node.append($createLineBreakNode());
+    }
+  });
+
+  editor.registerNodeTransform<QuestionNode>(QuestionNode, preventDeletion);
+  editor.registerNodeTransform<SolutionNode>(SolutionNode, preventDeletion);
+  return null;
+}
+
+
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
 // try to recover gracefully without losing user data.
@@ -264,7 +314,7 @@ function LexicalExample() {
     theme: editor_theme,
     onError,
     editorState: setInitialValue,
-    nodes: [ExerciseNode, SolutionNode, QuestionNode, ParagraphNode],
+    nodes: [ExerciseNode, SolutionNode, QuestionNode, ExerciseText],
   };
 
   return (
@@ -277,6 +327,7 @@ function LexicalExample() {
       <OnChangePlugin onChange={onChange} />
       <HistoryPlugin />
       <MyCustomAutoFocusPlugin />
+      <PreserveExStructurePlugin />
     </LexicalComposer>
   );
 }

@@ -25,7 +25,9 @@ The implemented examples can be found here:
 - [x] add initial text
 - [x] add borders to the different elements
 - [x] undo/redo: @lexical/history
-- [ ] fixed format: poll example: https://lexical.dev/docs/demos/plugins/poll
+- [x] fixed format:
+    - poll example: https://lexical.dev/docs/demos/plugins/poll
+    - node transforms: https://lexical.dev/docs/concepts/transforms
 - [ ] copy paste behavior
 
 /packages/lexical-playground/src/nodes/PollComponent
