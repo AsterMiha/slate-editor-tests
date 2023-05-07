@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import SlateExample from './SlateExample';
 import LexicalExample from './LexicalExample';
+import CKEditorExample from './CKEditorExample';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
@@ -15,6 +16,7 @@ root.render(
         <Route path="/">
           <Route path="slate" element={<SlateExample />} />
           <Route path="lexical" element={<LexicalExample />} />
+          <Route path="cke" element={<CKEditorExample />} />
         </Route>
       </Routes>
     </BrowserRouter>

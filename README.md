@@ -4,6 +4,7 @@ Run examples with: `yarn start`
 The implemented examples can be found here:
 - Slate: http://localhost:3000/slate
 - Lexical: http://localhost:3000/lexical
+- CKEditor: http://localhost:3000/cke
 
 ## Slate implementation
 - [x] copy paste for simple example
@@ -28,7 +29,6 @@ The implemented examples can be found here:
 - [x] fixed format:
     - poll example: https://lexical.dev/docs/demos/plugins/poll
     - node transforms: https://lexical.dev/docs/concepts/transforms
-- [ ] copy paste behavior
 
-/packages/lexical-playground/src/nodes/PollComponent
-/packages/lexical-playground/src/nodes/PollNode
+## CKEditor
+- [x] show simple editor
