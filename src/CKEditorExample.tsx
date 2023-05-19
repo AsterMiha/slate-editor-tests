@@ -3,17 +3,51 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 import { EditorConfig } from '@ckeditor/ckeditor5-core';
 
-// for the toolbar
+// For the toolbar
 import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials';
 import Heading from '@ckeditor/ckeditor5-heading/src/heading';
 import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
 import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
 
+// For exercise plugin
+import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
+import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
+
+class Exercise extends Plugin {
+    init() {
+        const editor = this.editor;
+        // The button must be registered among the UI components of the editor
+        // to be displayed in the toolbar.
+        editor.ui.componentFactory.add( 'exercise', () => {
+            // The button will be an instance of ButtonView.
+            const button = new ButtonView();
+
+            button.set( {
+                label: 'Exercise',
+                withText: true
+            } );
+
+            button.on( 'execute', () => {
+                const now = new Date();
+
+                // Change the model using the model writer.
+                editor.model.change( writer => {
+
+                    // Insert the text at the user's current position.
+                    editor.model.insertContent( writer.createText( 'Exercise added!' ) );
+                } );
+            });
+
+            return button;
+        });
+    }
+}
+
 function CKEditorExample() {
     const customConfigs: EditorConfig = {};
-    customConfigs.plugins = [ Essentials, Paragraph, Heading, Bold, Italic ];
-    customConfigs.toolbar = [ 'bold', 'italic' ];
+    customConfigs.plugins = [ Essentials, Paragraph, Heading, Bold, Italic, Exercise ];
+    customConfigs.toolbar = [ 'bold', 'italic', 'exercise' ];
 
     return (
         <div className="App">

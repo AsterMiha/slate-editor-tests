@@ -32,7 +32,7 @@ The implemented examples can be found here:
 
 ## CKEditor
 - [x] show simple editor
-- [ ] add exercise toolbar button
+- [x] add exercise toolbar button
 - [ ] create exercise fields
 - [ ] schemas for exercise components: https://ckeditor.com/docs/ckeditor5/latest/api/module_engine_model_schema-Schema.html
 - [ ] template for exercise structure: https://ckeditor.com/docs/ckeditor5/latest/features/template.html
