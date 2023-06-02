@@ -4,7 +4,7 @@ import CKEditorInspector from '@ckeditor/ckeditor5-inspector';
 import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
-import { EditorConfig } from '@ckeditor/ckeditor5-core';
+import { EditorConfig, Editor } from '@ckeditor/ckeditor5-core';
 
 // For the toolbar
 import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials';
@@ -42,17 +42,18 @@ class Exercise extends Plugin {
 
             button.on( 'execute', () => {
                 // Change the model using the model writer.
-                editor.model.change( writer => {
-                    const exercise =  writer.createElement('exercise');
-                    const question =  writer.createElement('question');
-                    const solution =  writer.createElement('solution');
+                // editor.model.change( writer => {
+                //     const exercise =  writer.createElement('exercise');
+                //     const question =  writer.createElement('question');
+                //     const solution =  writer.createElement('solution');
 
-                    question._appendChild(writer.createText('Question text?'));
-                    solution._appendChild(writer.createText('Solution text', {style: 'exercise'}));
-                    exercise._appendChild([question, solution]);
-                    // Insert the text at the user's current position.
-                    editor.model.insertContent(exercise);
-                } );
+                //     question._appendChild(writer.createText('Question text?'));
+                //     solution._appendChild(writer.createText('Solution text', {style: 'exercise'}));
+                //     exercise._appendChild([question, solution]);
+                //     // Insert the text at the user's current position.
+                //     editor.model.insertContent(exercise);
+                // } );
+                insertEx(editor, "Question text?", "Solution text.");
             });
 
             return button;
@@ -71,14 +72,21 @@ class Exercise extends Plugin {
             // isLimit: true, // Don't split with enter
             inheritAllFrom: '$block',
             allowIn: [ 'exercise' ],
+            allowChildren: [ 'extext' ],
         });
         schema.register('solution', {
             // isLimit: true, // Don't split with enter
             inheritAllFrom: '$block',
-            allowIn: [ 'exercise' ]
+            allowIn: [ 'exercise' ],
+            allowChildren: [ 'extext' ],
         });
         schema.register('exercise', {
-            inheritAllFrom: '$blockObject'
+            inheritAllFrom: '$blockObject',
+            allowChildren: [ 'question', 'solution' ],
+        })
+        schema.register('extext', {
+            inheritAllFrom: '$block',
+            allowIn: [ 'question', 'solution' ],
         })
     }
 
@@ -112,7 +120,37 @@ class Exercise extends Plugin {
                 'margin-bottom': '0.2em',
             }
         } } );
+        conversion.elementToElement( { model: 'extext', view: {
+            name: 'div',
+            styles: {
+                'border': 'pink solid 1px',
+                'border-radius': '2px',
+                'padding': '0.3em',
+                'margin-bottom': '0.2em',
+            }
+        } } );
     }
+}
+
+function insertEx(editor:Editor, qtext:string, soltext:string) {
+    editor.model.change( writer => {
+        const exercise =  writer.createElement('exercise');
+        const question =  writer.createElement('question');
+        const solution =  writer.createElement('solution');
+        const question_text = writer.createElement('extext');
+        const solution_text = writer.createElement('extext');
+
+        question_text._appendChild(writer.createText(qtext));
+        solution_text._appendChild(writer.createText(soltext));
+
+        question._appendChild(question_text);
+        solution._appendChild(solution_text);
+        
+        exercise._appendChild([question, solution]);
+        
+        // Insert the text at the user's current position.
+        editor.model.insertContent(exercise);
+    } );
 }
 
 function CKEditorExample() {
@@ -134,6 +172,13 @@ function CKEditorExample() {
             onChange={ ( event, editor ) => {
                 const data = editor.getData();
                 console.log( { event, editor, data } );
+
+                // Should only have 1 root named 'main'
+                const rootNames = editor.model.document.getRootNames();
+                const child_iter = editor.model.document.getRoot('main')?.getChildren();
+                for (var child of child_iter?child_iter:[]) {
+                    console.log(child);
+                }
             } }
             onBlur={ ( event, editor ) => {
                 console.log( 'Blur.', editor );

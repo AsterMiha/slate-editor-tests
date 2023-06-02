@@ -38,5 +38,6 @@ The implemented examples can be found here:
 - [x] schemas for exercise components: https://ckeditor.com/docs/ckeditor5/latest/api/module_engine_model_schema-Schema.html
 - [ ] template for exercise structure: https://ckeditor.com/docs/ckeditor5/latest/features/template.html
 - [ ] insert new exercise when cursor inside a different exercise
+- [ ] only allow 1 question and 1 solution inside an exercise
 - [ ] selection and pasing behavior
 
