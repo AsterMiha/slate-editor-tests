@@ -33,6 +33,10 @@ The implemented examples can be found here:
 ## CKEditor
 - [x] show simple editor
 - [x] add exercise toolbar button
-- [ ] create exercise fields
-- [ ] schemas for exercise components: https://ckeditor.com/docs/ckeditor5/latest/api/module_engine_model_schema-Schema.html
+- [x] create exercise schema
+- [x] create exercise view: https://ckeditor.com/docs/ckeditor5/latest/framework/plugins/abbreviation-plugin/abbreviation-plugin-level-1.html
+- [x] schemas for exercise components: https://ckeditor.com/docs/ckeditor5/latest/api/module_engine_model_schema-Schema.html
 - [ ] template for exercise structure: https://ckeditor.com/docs/ckeditor5/latest/features/template.html
+- [ ] insert new exercise when cursor inside a different exercise
+- [ ] selection and pasing behavior
+
