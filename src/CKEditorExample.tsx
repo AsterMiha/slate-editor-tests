@@ -5,6 +5,7 @@ import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 import { EditorConfig, Editor } from '@ckeditor/ckeditor5-core';
+import Item from '@ckeditor/ckeditor5-engine/src/model/item'; 
 
 // For the toolbar
 import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials';
@@ -27,8 +28,6 @@ class Exercise extends Plugin {
         const editor = this.editor;
         CKEditorInspector.attach( editor );
 
-        // editor.commands.execute('style', "ExerciseStyle");
-
         // The button must be registered among the UI components of the editor
         // to be displayed in the toolbar.
         editor.ui.componentFactory.add( 'exercise', () => {
@@ -41,18 +40,6 @@ class Exercise extends Plugin {
             } );
 
             button.on( 'execute', () => {
-                // Change the model using the model writer.
-                // editor.model.change( writer => {
-                //     const exercise =  writer.createElement('exercise');
-                //     const question =  writer.createElement('question');
-                //     const solution =  writer.createElement('solution');
-
-                //     question._appendChild(writer.createText('Question text?'));
-                //     solution._appendChild(writer.createText('Solution text', {style: 'exercise'}));
-                //     exercise._appendChild([question, solution]);
-                //     // Insert the text at the user's current position.
-                //     editor.model.insertContent(exercise);
-                // } );
                 insertEx(editor, "Question text?", "Solution text.");
             });
 
@@ -69,13 +56,11 @@ class Exercise extends Plugin {
         const dataSchema = this.editor.plugins.get( 'DataSchema' );
 
         schema.register('question', {
-            // isLimit: true, // Don't split with enter
             inheritAllFrom: '$block',
             allowIn: [ 'exercise' ],
             allowChildren: [ 'extext' ],
         });
         schema.register('solution', {
-            // isLimit: true, // Don't split with enter
             inheritAllFrom: '$block',
             allowIn: [ 'exercise' ],
             allowChildren: [ 'extext' ],
@@ -176,9 +161,20 @@ function CKEditorExample() {
                 // Should only have 1 root named 'main'
                 const rootNames = editor.model.document.getRootNames();
                 const child_iter = editor.model.document.getRoot('main')?.getChildren();
-                for (var child of child_iter?child_iter:[]) {
-                    console.log(child);
+
+                let toRemove:Array<Item> = [];
+                for (let child of child_iter?child_iter:[]) {
+                    if (!child.is('element', 'exercise') && !child.is('element', 'paragraph')) {
+                        console.log('not exercise!!!')
+                        toRemove.push(child);
+                    }
                 }
+
+                editor.model.change(writer => {
+                    for (let item of toRemove) {
+                        writer.remove(item);
+                    }
+                })
             } }
             onBlur={ ( event, editor ) => {
                 console.log( 'Blur.', editor );

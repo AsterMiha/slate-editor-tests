@@ -1346,7 +1346,7 @@
     rimraf "^3.0.2"
     webpack-sources "^2.0.1"
 
-"@ckeditor/ckeditor5-dev-utils@^38.0.0":
+"@ckeditor/ckeditor5-dev-utils@^37.0.0":
   version "37.0.1"
   resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-dev-utils/-/ckeditor5-dev-utils-37.0.1.tgz#e81b0c9d551d48c51d72f22f8a6a448c2d432d53"
   integrity sha512-JBMrm10R4QzOG7Ob/BPDv/79siA1fpB8WnzKneK51YTwI/s5frdbFpVjcF32X5Hwmd6CIgWs1LBJ5S0vZzj4mw==
