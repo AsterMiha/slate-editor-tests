@@ -96,11 +96,6 @@ class CKEditorInputEx extends Plugin {
     _defineSchema() {
         const schema = this.editor.model.schema;
 
-        schema.register('inputField', {
-            inheritAllFrom: 'solution',
-            allowWhere: 'question',
-        });
-
         schema.register('inputFormReact', {
             isLimit:true,
             allowWhere: 'question',
@@ -132,6 +127,9 @@ class CKEditorInputEx extends Plugin {
 
                 // Convert to widget
                 const widget = toWidget( section, viewWriter);
+                // Input field only works if this attribure is set to true, otherwise we can only interact with the button
+                // https://ckeditor.com/docs/ckeditor5/latest/framework/deep-dive/ui/widget-internals.html#exclude-dom-events-from-default-handlers
+                widget._setAttribute('data-cke-ignore-events', true);
                 return widget;
             }
         })
