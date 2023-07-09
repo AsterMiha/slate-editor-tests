@@ -20,6 +20,10 @@ import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 import Style from '@ckeditor/ckeditor5-style/src/style';
 import GeneralHtmlSupport from '@ckeditor/ckeditor5-html-support/src/generalhtmlsupport';
 
+// More custom exercise types
+import CKEditorInputEx from "./CKEditorInputExPlugin";
+import { SolutionInputForm } from "./CKEditorInputExPlugin";
+
 class Exercise extends Plugin {
     init() {
         this._defineSchema();
@@ -50,7 +54,6 @@ class Exercise extends Plugin {
     // Define exercise components
     _defineSchema() {
         const schema = this.editor.model.schema;
-
 
         const dataFilter = this.editor.plugins.get( 'DataFilter' );
         const dataSchema = this.editor.plugins.get( 'DataSchema' );
@@ -140,51 +143,52 @@ function insertEx(editor:Editor, qtext:string, soltext:string) {
 
 function CKEditorExample() {
     const customConfigs: EditorConfig = {};
-    customConfigs.plugins = [ Essentials, Paragraph, Exercise, GeneralHtmlSupport, Style ];
-    customConfigs.toolbar = [ 'exercise', 'style' ];
+    customConfigs.plugins = [ Essentials, Paragraph,
+        Exercise, CKEditorInputEx,
+        GeneralHtmlSupport, Style ];
+    customConfigs.toolbar = [ 'exercise', 'input_ex' ];
 
     return (
-        <div className="App">
-        <h2>Using CKEditor 5 build in React</h2>
-        <CKEditor
-            editor={ ClassicEditor }
-            data="<p>Hello from CKEditor 5!</p>"
-            config={customConfigs}
-            onReady={ editor => {
-                // You can store the "editor" and use when it is needed.
-                console.log( 'Editor is ready to use!', editor );
-            } }
-            onChange={ ( event, editor ) => {
-                const data = editor.getData();
-                console.log( { event, editor, data } );
+        <><div className="App">
+            <h2>Using CKEditor 5 build in React</h2>
+            <CKEditor
+                editor={ClassicEditor}
+                data="<p>Hello from CKEditor 5!</p>"
+                config={customConfigs}
+                onReady={editor => {
+                    // You can store the "editor" and use when it is needed.
+                    console.log('Editor is ready to use!');
+                } }
+                onChange={(event, editor) => {
+                    const data = editor.getData();
+                    console.log({ event, editor, data });
 
-                // Should only have 1 root named 'main'
-                const rootNames = editor.model.document.getRootNames();
-                const child_iter = editor.model.document.getRoot('main')?.getChildren();
+                    // Should only have 1 root named 'main'
+                    const rootNames = editor.model.document.getRootNames();
+                    const child_iter = editor.model.document.getRoot('main')?.getChildren();
 
-                let toRemove:Array<Item> = [];
-                for (let child of child_iter?child_iter:[]) {
-                    if (!child.is('element', 'exercise') && !child.is('element', 'paragraph')) {
-                        console.log('not exercise!!!')
-                        toRemove.push(child);
+                    let toRemove: Array<Item> = [];
+                    for (let child of child_iter ? child_iter : []) {
+                        if (!child.is('element', 'exercise') && !child.is('element', 'paragraph')) {
+                            console.log('not exercise!!!');
+                            toRemove.push(child);
+                        }
                     }
-                }
 
-                editor.model.change(writer => {
-                    for (let item of toRemove) {
-                        writer.remove(item);
-                    }
-                })
-            } }
-            onBlur={ ( event, editor ) => {
-                console.log( 'Blur.', editor );
-            } }
-            onFocus={ ( event, editor ) => {
-                console.log( 'Focus.', editor );
-                console.log(editor.model.schema);
-            } }
-        />
-    </div>
+                    editor.model.change(writer => {
+                        for (let item of toRemove) {
+                            writer.remove(item);
+                        }
+                    });
+                } }
+                onBlur={(event, editor) => {
+                    console.log('Blur.', editor);
+                } }
+                onFocus={(event, editor) => {
+                    console.log('Focus.', editor);
+                    console.log(editor.model.schema);
+                } } />
+        </div><SolutionInputForm /></>
     );
   }
   

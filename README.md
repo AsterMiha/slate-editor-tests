@@ -40,4 +40,13 @@ The implemented examples can be found here:
 - [ ] insert new exercise when cursor inside a different exercise
 - [ ] only allow 1 question and 1 solution inside an exercise
 - [ ] selection and pasing behavior
+- [ ] image upload https://ckeditor.com/docs/ckeditor5/latest/framework/deep-dive/upload-adapter.html
 
+- [ ] lists
+- [ ] forms, buttons
+- [ ] injection plugin
+
+Priority:
+- [ ] interactive exercise - check input
+- [ ] plugin performing a fetch after page loaded
+- [ ] math elements
