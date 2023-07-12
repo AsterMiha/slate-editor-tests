@@ -65,7 +65,7 @@ export function SolutionInputForm() {
     );
 }
 
-function renderExercise(domElement:ReactDOM.Container) {
+function renderExercise(domElement: ReactDOM.Container) {
     const root = createRoot(domElement as DocumentFragment);
     root.render(<SolutionInputForm />);
 }
@@ -86,7 +86,9 @@ class CKEditorInputEx extends Plugin {
             });
 
             button.on('execute', () => {
-                insertEx(editor, "Question text?");
+                if (!editor.isReadOnly) {
+                    insertEx(editor, "Question text?");
+                }
             });
 
             return button;
@@ -97,7 +99,7 @@ class CKEditorInputEx extends Plugin {
         const schema = this.editor.model.schema;
 
         schema.register('inputFormReact', {
-            isLimit:true,
+            isLimit: true,
             allowWhere: 'question',
         });
     }
@@ -111,22 +113,22 @@ class CKEditorInputEx extends Plugin {
             view: (modelElement, { writer: viewWriter }) => {
 
                 // Border CKEditor can interact with
-                const section = viewWriter.createContainerElement( 'div', {
+                const section = viewWriter.createContainerElement('div', {
                     class: 'inputEx',
-                } );
+                });
 
                 // React wrapper
-                const reactWrapper = viewWriter.createRawElement( 'div', {
+                const reactWrapper = viewWriter.createRawElement('div', {
                     class: 'inputEx__react-wrapper'
-                }, function( domElement ) {
+                }, function (domElement) {
                     renderExercise(domElement);
-                } );
+                });
 
                 // Insert wrapped React component at the start of the CKEditor section
-                viewWriter.insert( viewWriter.createPositionAt( section, 0 ), reactWrapper );
+                viewWriter.insert(viewWriter.createPositionAt(section, 0), reactWrapper);
 
                 // Convert to widget
-                const widget = toWidget( section, viewWriter);
+                const widget = toWidget(section, viewWriter);
                 // Input field only works if this attribure is set to true, otherwise we can only interact with the button
                 // https://ckeditor.com/docs/ckeditor5/latest/framework/deep-dive/ui/widget-internals.html#exclude-dom-events-from-default-handlers
                 widget._setAttribute('data-cke-ignore-events', true);

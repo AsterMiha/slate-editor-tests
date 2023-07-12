@@ -5,7 +5,7 @@ import React, { Component } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 import { EditorConfig, Editor } from '@ckeditor/ckeditor5-core';
-import Item from '@ckeditor/ckeditor5-engine/src/model/item'; 
+import Item from '@ckeditor/ckeditor5-engine/src/model/item';
 
 // For the toolbar
 import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials';
@@ -23,6 +23,7 @@ import GeneralHtmlSupport from '@ckeditor/ckeditor5-html-support/src/generalhtml
 // More custom exercise types
 import CKEditorInputEx from "./CKEditorInputExPlugin";
 import { SolutionInputForm } from "./CKEditorInputExPlugin";
+import CKEditorEditingMode from "./CKEditorEditingMode";
 
 class Exercise extends Plugin {
     init() {
@@ -30,21 +31,23 @@ class Exercise extends Plugin {
         this._defineConverters();
 
         const editor = this.editor;
-        CKEditorInspector.attach( editor );
+        CKEditorInspector.attach(editor);
 
         // The button must be registered among the UI components of the editor
         // to be displayed in the toolbar.
-        editor.ui.componentFactory.add( 'exercise', () => {
+        editor.ui.componentFactory.add('exercise', () => {
             // The button will be an instance of ButtonView.
             const button = new ButtonView();
 
-            button.set( {
+            button.set({
                 label: 'Exercise',
                 withText: true
-            } );
+            });
 
-            button.on( 'execute', () => {
-                insertEx(editor, "Question text?", "Solution text.");
+            button.on('execute', () => {
+                if (!editor.isReadOnly) {
+                    insertEx(editor, "Question text?", "Solution text.");
+                }
             });
 
             return button;
@@ -55,76 +58,84 @@ class Exercise extends Plugin {
     _defineSchema() {
         const schema = this.editor.model.schema;
 
-        const dataFilter = this.editor.plugins.get( 'DataFilter' );
-        const dataSchema = this.editor.plugins.get( 'DataSchema' );
+        const dataFilter = this.editor.plugins.get('DataFilter');
+        const dataSchema = this.editor.plugins.get('DataSchema');
 
         schema.register('question', {
             inheritAllFrom: '$block',
-            allowIn: [ 'exercise' ],
-            allowChildren: [ 'extext' ],
+            allowIn: ['exercise'],
+            allowChildren: ['extext'],
         });
         schema.register('solution', {
             inheritAllFrom: '$block',
-            allowIn: [ 'exercise' ],
-            allowChildren: [ 'extext' ],
+            allowIn: ['exercise'],
+            allowChildren: ['extext'],
         });
         schema.register('exercise', {
             inheritAllFrom: '$blockObject',
-            allowChildren: [ 'question', 'solution' ],
+            allowChildren: ['question', 'solution'],
         })
         schema.register('extext', {
             inheritAllFrom: '$block',
-            allowIn: [ 'question', 'solution' ],
+            allowIn: ['question', 'solution'],
         })
     }
 
     _defineConverters() {
         const conversion = this.editor.conversion;
 
-        conversion.elementToElement( { model: 'question', view: {
-            name: 'div',
-            styles: {
-                'border': 'orange solid 1px',
-                'border-radius': '2px',
-                'padding': '0.3em',
-                'margin-bottom': '0.2em',
+        conversion.elementToElement({
+            model: 'question', view: {
+                name: 'div',
+                styles: {
+                    'border': 'orange solid 1px',
+                    'border-radius': '2px',
+                    'padding': '0.3em',
+                    'margin-bottom': '0.2em',
+                }
             }
-        } } );
-        conversion.elementToElement( { model: 'solution', view: {
-            name: 'div',
-            styles: {
-                'border': 'green solid 1px',
-                'border-radius': '2px',
-                'padding': '0.3em',
-                'margin-bottom': '0.2em',
+        });
+        conversion.elementToElement({
+            model: 'solution', view: {
+                name: 'div',
+                styles: {
+                    'border': 'green solid 1px',
+                    'border-radius': '2px',
+                    'padding': '0.3em',
+                    'margin-bottom': '0.2em',
+                }
             }
-        } } );
-        conversion.elementToElement( { model: 'exercise', view: {
-            name: 'div',
-            styles: {
-                'border': 'blue solid 1px',
-                'border-radius': '2px',
-                'padding': '0.3em',
-                'margin-bottom': '0.2em',
+        });
+        conversion.elementToElement({
+            model: 'exercise', view: {
+                name: 'div',
+                styles: {
+                    'border': 'blue solid 1px',
+                    'border-radius': '2px',
+                    'padding': '0.3em',
+                    'margin-bottom': '0.2em',
+                }
             }
-        } } );
-        conversion.elementToElement( { model: 'extext', view: {
-            name: 'div',
-            styles: {
-                'border': 'pink solid 1px',
-                'border-radius': '2px',
-                'padding': '0.3em',
-                'margin-bottom': '0.2em',
+        });
+        conversion.elementToElement({
+            model: 'extext', view: {
+                name: 'div',
+                styles: {
+                    'border': 'pink solid 1px',
+                    'border-radius': '2px',
+                    'padding': '0.3em',
+                    'margin-bottom': '0.2em',
+                }
             }
-        } } );
+        });
     }
 }
 
-function insertEx(editor:Editor, qtext:string, soltext:string) {
-    editor.model.change( writer => {
-        const exercise =  writer.createElement('exercise');
-        const question =  writer.createElement('question');
-        const solution =  writer.createElement('solution');
+function insertEx(editor: Editor, qtext: string, soltext: string) {
+    editor.model.change(writer => {
+        const exercise = writer.createElement('exercise');
+        const question = writer.createElement('question');
+        const solution = writer.createElement('solution');
         const question_text = writer.createElement('extext');
         const solution_text = writer.createElement('extext');
 
@@ -133,20 +144,20 @@ function insertEx(editor:Editor, qtext:string, soltext:string) {
 
         question._appendChild(question_text);
         solution._appendChild(solution_text);
-        
+
         exercise._appendChild([question, solution]);
-        
+
         // Insert the text at the user's current position.
         editor.model.insertContent(exercise);
-    } );
+    });
 }
 
 function CKEditorExample() {
     const customConfigs: EditorConfig = {};
-    customConfigs.plugins = [ Essentials, Paragraph,
-        Exercise, CKEditorInputEx,
-        GeneralHtmlSupport, Style ];
-    customConfigs.toolbar = [ 'exercise', 'input_ex' ];
+    customConfigs.plugins = [Essentials, Paragraph,
+        Exercise, CKEditorInputEx, CKEditorEditingMode,
+        GeneralHtmlSupport, Style];
+    customConfigs.toolbar = ['exercise', 'input_ex', 'editing-mode'];
 
     return (
         <><div className="App">
@@ -158,7 +169,8 @@ function CKEditorExample() {
                 onReady={editor => {
                     // You can store the "editor" and use when it is needed.
                     console.log('Editor is ready to use!');
-                } }
+                    // editor.enableReadOnlyMode('editing-mode');
+                }}
                 onChange={(event, editor) => {
                     const data = editor.getData();
                     console.log({ event, editor, data });
@@ -180,16 +192,16 @@ function CKEditorExample() {
                             writer.remove(item);
                         }
                     });
-                } }
+                }}
                 onBlur={(event, editor) => {
                     console.log('Blur.', editor);
-                } }
+                }}
                 onFocus={(event, editor) => {
                     console.log('Focus.', editor);
                     console.log(editor.model.schema);
-                } } />
+                }} />
         </div><SolutionInputForm /></>
     );
-  }
-  
-  export default CKEditorExample;
+}
+
+export default CKEditorExample;
