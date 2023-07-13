@@ -1,7 +1,7 @@
 import "./App.css";
 import CKEditorInspector from '@ckeditor/ckeditor5-inspector';
 
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
 import { EditorConfig, Editor } from '@ckeditor/ckeditor5-core';
@@ -22,7 +22,7 @@ import GeneralHtmlSupport from '@ckeditor/ckeditor5-html-support/src/generalhtml
 
 // More custom exercise types
 import CKEditorInputEx from "./CKEditorInputExPlugin";
-import { SolutionInputForm } from "./CKEditorInputExPlugin";
+import { SolutionInputFormEditable } from "./CKEditorInputExPlugin";
 import CKEditorEditingMode from "./CKEditorEditingMode";
 
 class Exercise extends Plugin {
@@ -159,6 +159,10 @@ function CKEditorExample() {
         GeneralHtmlSupport, Style];
     customConfigs.toolbar = ['exercise', 'input_ex', 'editing-mode'];
 
+    const [isReadOnly, setIsReadOnly] = useState(
+        { isEditorReadOnly: false, }
+    )
+
     return (
         <><div className="App">
             <h2>Using CKEditor 5 build in React</h2>
@@ -174,6 +178,8 @@ function CKEditorExample() {
                 onChange={(event, editor) => {
                     const data = editor.getData();
                     console.log({ event, editor, data });
+
+                    console.log("Change type:", event.name);
 
                     // Should only have 1 root named 'main'
                     const rootNames = editor.model.document.getRootNames();
@@ -200,7 +206,7 @@ function CKEditorExample() {
                     console.log('Focus.', editor);
                     console.log(editor.model.schema);
                 }} />
-        </div><SolutionInputForm /></>
+        </div><SolutionInputFormEditable /></>
     );
 }
 
