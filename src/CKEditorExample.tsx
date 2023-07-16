@@ -19,11 +19,14 @@ import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import ButtonView from '@ckeditor/ckeditor5-ui/src/button/buttonview';
 import Style from '@ckeditor/ckeditor5-style/src/style';
 import GeneralHtmlSupport from '@ckeditor/ckeditor5-html-support/src/generalhtmlsupport';
+import ImageEditing from '@ckeditor/ckeditor5-image/src/image/imageediting';
 
 // More custom exercise types
 import CKEditorInputEx from "./CKEditorInputExPlugin";
 import { SolutionInputFormEditable } from "./CKEditorInputExPlugin";
 import CKEditorEditingMode from "./CKEditorEditingMode";
+
+// import fetch from 'isomorphic-unfetch'
 
 class Exercise extends Plugin {
     init() {
@@ -154,7 +157,7 @@ function insertEx(editor: Editor, qtext: string, soltext: string) {
 
 function CKEditorExample() {
     const customConfigs: EditorConfig = {};
-    customConfigs.plugins = [Essentials, Paragraph,
+    customConfigs.plugins = [Essentials, Paragraph, ImageEditing,
         Exercise, CKEditorInputEx, CKEditorEditingMode,
         GeneralHtmlSupport, Style];
     customConfigs.toolbar = ['exercise', 'input_ex', 'editing-mode'];
@@ -162,6 +165,20 @@ function CKEditorExample() {
     const [isReadOnly, setIsReadOnly] = useState(
         { isEditorReadOnly: false, }
     )
+
+    const fetchExample = async () => {
+        const response = await fetch('https://cat-fact.herokuapp.com/facts/', {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        const facts = await response.json();
+        const rand_index = (Math.random() * facts.length) | 0;
+        console.log(facts[rand_index].text);
+        return facts[rand_index].text;
+    }
 
     return (
         <><div className="App">
@@ -173,7 +190,18 @@ function CKEditorExample() {
                 onReady={editor => {
                     // You can store the "editor" and use when it is needed.
                     console.log('Editor is ready to use!');
-                    // editor.enableReadOnlyMode('editing-mode');
+                    fetchExample().then((data) => {
+                        const editor_root = editor.model.document.getRoot('main');
+                        if (editor_root) {
+                            editor.model.change(writer => {
+                                console.log(data);
+                                const paragraph = writer.createElement('paragraph');
+                                const text = writer.createText("Funfact: " + data);
+                                writer.append(text, paragraph);
+                                writer.append(paragraph, editor_root);
+                            })
+                        }
+                    });
                 }}
                 onChange={(event, editor) => {
                     const data = editor.getData();
