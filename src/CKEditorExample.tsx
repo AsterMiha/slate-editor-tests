@@ -11,8 +11,8 @@ import Item from '@ckeditor/ckeditor5-engine/src/model/item';
 import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials';
 // import Heading from '@ckeditor/ckeditor5-heading/src/heading';
 import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
-// import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
-// import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
+import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
+import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
 
 // For exercise plugin
 import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
@@ -25,8 +25,11 @@ import ImageEditing from '@ckeditor/ckeditor5-image/src/image/imageediting';
 import CKEditorInputEx from "./CKEditorInputExPlugin";
 import { SolutionInputFormEditable } from "./CKEditorInputExPlugin";
 import CKEditorEditingMode from "./CKEditorEditingMode";
-
-// import fetch from 'isomorphic-unfetch'
+import List from "@ckeditor/ckeditor5-list/src/list";
+import { TodoList } from "@ckeditor/ckeditor5-list";
+import Table from "@ckeditor/ckeditor5-table/src/table";
+import TableToolbar from "@ckeditor/ckeditor5-table/src/tabletoolbar";
+import BlockQuote from "@ckeditor/ckeditor5-block-quote/src/blockquote";
 
 class Exercise extends Plugin {
     init() {
@@ -159,12 +162,17 @@ function CKEditorExample() {
     const customConfigs: EditorConfig = {};
     customConfigs.plugins = [Essentials, Paragraph, ImageEditing,
         Exercise, CKEditorInputEx, CKEditorEditingMode,
-        GeneralHtmlSupport, Style];
-    customConfigs.toolbar = ['exercise', 'input_ex', 'editing-mode'];
+        GeneralHtmlSupport, Style,
+        Bold, Italic, BlockQuote,
+        List, TodoList,
+        Table, TableToolbar
+    ];
+    customConfigs.toolbar = ['exercise', 'input_ex', 'editing-mode', '|',
+        'bold', 'italic', 'blockQuote', '|',
+        'bulletedList', 'numberedList', 'todoList', '|',
+        'insertTable', 'tableRow', 'tableColumn', 'mergeTableCells'
+    ];
 
-    const [isReadOnly, setIsReadOnly] = useState(
-        { isEditorReadOnly: false, }
-    )
 
     const fetchExample = async () => {
         const response = await fetch('https://cat-fact.herokuapp.com/facts/', {
@@ -215,7 +223,7 @@ function CKEditorExample() {
 
                     let toRemove: Array<Item> = [];
                     for (let child of child_iter ? child_iter : []) {
-                        if (!child.is('element', 'exercise') && !child.is('element', 'paragraph')) {
+                        if (child.is('element', 'solution') || child.is('element', 'question')) {
                             console.log('not exercise!!!');
                             toRemove.push(child);
                         }
@@ -234,7 +242,7 @@ function CKEditorExample() {
                     console.log('Focus.', editor);
                     console.log(editor.model.schema);
                 }} />
-        </div><SolutionInputFormEditable /></>
+        </div></>
     );
 }
 
